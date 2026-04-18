@@ -59,9 +59,10 @@ async function connectWhatsApp() {
     logger,
     browser: ['Windows', 'Chrome', '11.0.0'],
     markOnline: true,
-    connectTimeoutMs: 60000,
-    retryRequestDelayMs: 2000,
-    defaultQueryTimeoutMs: undefined,
+    connectTimeoutMs: 90000, // Tingkatkan ke 90 detik
+    retryRequestDelayMs: 5000,
+    defaultQueryTimeoutMs: 90000,
+    keepAliveIntervalMs: 10000,
     syncFullHistory: false,
   });
 
