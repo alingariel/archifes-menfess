@@ -58,14 +58,15 @@ async function connectWhatsApp() {
 
     console.log('[WA] 🔌 Membuka socket koneksi...');
     sock = makeWASocket({
+      version: [2, 3000, 1015901307], // Gunakan versi stabil yang diketahui bekerja
       auth: {
         creds: state.creds,
         keys: makeCacheableSignalKeyStore(state.keys, logger),
       },
       logger,
-      browser: ['Ubuntu', 'Chrome', '110.0.5481.177'],
+      browser: ['Mac OS', 'Chrome', '121.0.0.0'],
       markOnline: true,
-      connectTimeoutMs: 90000,
+      connectTimeoutMs: 120000, // Tingkatkan ke 120 detik untuk keandalan
       retryRequestDelayMs: 5000,
       defaultQueryTimeoutMs: 90000,
       keepAliveIntervalMs: 10000,
