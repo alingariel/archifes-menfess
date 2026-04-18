@@ -24,7 +24,7 @@ let isConnected = false;
 let CHANNEL_JID = '120363428902488979@newsletter';
 let pairingRequested = false;
 
-const PHONE_NUMBER = '6281992225225'; // Anda bisa mengabaikan ini jika menggunakan Scan QR
+const PHONE_NUMBER = process.env.WA_PHONE_NUMBER || '628123456789'; // Masukkan nomor HP Anda di Variables Railway
 const BASE_URL = process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : 'http://localhost:3001';
 
 async function connectWhatsApp() {
