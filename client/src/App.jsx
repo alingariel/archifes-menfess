@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
+const API_URL = '/api';
+const SOCKET_URL = '/';
 
 const socket = io(SOCKET_URL);
 const SESSION_ID = localStorage.getItem('session_id') || Math.random().toString(36).substring(2);

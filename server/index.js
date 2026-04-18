@@ -30,6 +30,11 @@ import { connectWhatsApp, sendToChannel, sendCommentToChannel, deleteFromChannel
 
 const app = express();
 const server = http.createServer(app);
+
+// Gabungkan Frontend: Sajikan file dari folder client/dist
+const clientDistPath = path.join(__dirname, '..', 'client', 'dist');
+app.use(express.static(clientDistPath));
+
 const io = new Server(server, {
   cors: {
     origin: function (origin, callback) {
@@ -312,6 +317,15 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3001;
+// Rute terakhir: Fallback untuk website (SPA)
+app.get('*', (req, res) => {
+  // Jika mencari /api atau /socket.io, biarkan lewat. 
+  // Tapi sisanya tampilkan website (index.html)
+  if (!req.path.startsWith('/api') && !req.path.startsWith('/socket.io')) {
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  }
+});
+
 server.listen(PORT, () => {
   console.log(`Server berjalan di port ${PORT}`);
   
