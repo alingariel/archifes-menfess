@@ -88,4 +88,25 @@ async function sendToChannel(menfessData) {
   }
 }
 
-export { connectWhatsApp, sendToChannel };
+async function deleteFromChannel(messageId) {
+  if (!isConnected || !sock || !CHANNEL_JID || !messageId) return false;
+  try {
+    await sock.sendMessage(CHANNEL_JID, { 
+      delete: { remoteJid: CHANNEL_JID, fromMe: true, id: messageId, participant: sock.user.id.split(':')[0] + '@s.whatsapp.net' } 
+    });
+    return true;
+  } catch (err) { return false; }
+}
+
+async function sendCommentToChannel(parentUniqueId, parentContent, commentData) {
+  if (!isConnected || !sock || !CHANNEL_JID) return false;
+  try {
+    const message = `💬 *Balasan untuk #${parentUniqueId}:*\n> "${parentContent.substring(0, 50)}..." \n\n${commentData.content}`;
+    await sock.sendMessage(CHANNEL_JID, { text: message });
+    return true;
+  } catch (err) { return false; }
+}
+
+function getStatus() { return { connected: isConnected }; }
+
+export { connectWhatsApp, sendToChannel, deleteFromChannel, sendCommentToChannel, getStatus };
