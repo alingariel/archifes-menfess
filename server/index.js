@@ -120,6 +120,23 @@ const apiLimiter = rateLimit({
 });
 
 // Endpoints
+app.get('/api/wa/qr', (req, res) => {
+  const dataDir = path.resolve(__dirname, 'data');
+  const qrPath = path.resolve(dataDir, 'whatsapp_qr.png');
+  if (fs.existsSync(qrPath)) {
+    res.sendFile(qrPath);
+  } else {
+    res.setHeader('Content-Type', 'text/html');
+    res.status(200).send(`
+      <div style="font-family: sans-serif; text-align: center; padding: 50px;">
+        <h2>🔄 Menyiapkan Mesin Browser Asli...</h2>
+        <p>Mohon tunggu 30-60 detik. Bot sedang meluncurkan Puppeteer untuk menghindari blokir.</p>
+        <script>setTimeout(() => { window.location.reload(); }, 10000);</script>
+      </div>
+    `);
+  }
+});
+
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 app.get('/api/menfess', (req, res) => {
@@ -326,4 +343,5 @@ app.get('*splat', (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`Server berjalan di port ${PORT}`);
+  connectWhatsApp().catch(err => console.error('[WA] Gagal memulai:', err.message));
 });
