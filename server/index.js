@@ -186,13 +186,23 @@ app.post('/api/menfess', apiLimiter, (req, res) => {
 
 app.post('/api/menfess/:id/like', (req, res) => {
   const menfessId = req.params.id;
-  
   db.run(`INSERT INTO likes (menfess_id, count) VALUES (?, 1) ON CONFLICT(menfess_id) DO UPDATE SET count = count + 1`, [menfessId], function(err) {
     if (err) return res.status(500).json({ error: 'Gagal menyukai.' });
-    
     db.get('SELECT count FROM likes WHERE menfess_id = ?', [menfessId], (err2, row) => {
       io.emit('update_like', { menfess_id: menfessId, count: row.count });
       res.json({ success: true, count: row.count });
+    });
+  });
+});
+
+app.post('/api/menfess/:id/unlike', (req, res) => {
+  const menfessId = req.params.id;
+  db.run(`UPDATE likes SET count = MAX(0, count - 1) WHERE menfess_id = ?`, [menfessId], function(err) {
+    if (err) return res.status(500).json({ error: 'Gagal batal sukai.' });
+    db.get('SELECT count FROM likes WHERE menfess_id = ?', [menfessId], (err2, row) => {
+      const count = row ? row.count : 0;
+      io.emit('update_like', { menfess_id: menfessId, count });
+      res.json({ success: true, count });
     });
   });
 });
