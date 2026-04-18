@@ -35,42 +35,42 @@ async function connectWhatsApp() {
 
     const authPath = path.join(__dirname, 'data', 'wa_auth');
   
-  // Fitur Reset: Hapus folder sesi jika diminta lewat Environment Variables
-  if (process.env.RESET_WA_SESSION === 'true') {
-    console.log('[WA] 🛠️  Mereset sesi WhatsApp atas permintaan user...');
-    try {
-      if (existsSync(authPath)) {
-        rmSync(authPath, { recursive: true, force: true });
-        console.log('[WA] ✅ Folder wa_auth berhasil dibersihkan.');
+    // Fitur Reset: Hapus folder sesi jika diminta lewat Environment Variables
+    if (process.env.RESET_WA_SESSION === 'true') {
+      console.log('[WA] 🛠️  Mereset sesi WhatsApp atas permintaan user...');
+      try {
+        if (existsSync(authPath)) {
+          rmSync(authPath, { recursive: true, force: true });
+          console.log('[WA] ✅ Folder wa_auth berhasil dibersihkan.');
+        }
+        const qrPath = path.join(__dirname, 'data', 'whatsapp_qr.png');
+        if (existsSync(qrPath)) {
+          rmSync(qrPath, { force: true });
+          console.log('[WA] ✅ File QR lama berhasil dibersihkan.');
+        }
+      } catch (err) {
+        console.error('[WA] ❌ Gagal mereset sesi:', err.message);
       }
-      const qrPath = path.join(__dirname, 'data', 'whatsapp_qr.png');
-      if (existsSync(qrPath)) {
-        rmSync(qrPath, { force: true });
-        console.log('[WA] ✅ File QR lama berhasil dibersihkan.');
-      }
-    } catch (err) {
-      console.error('[WA] ❌ Gagal mereset sesi:', err.message);
     }
-  }
 
-  const { state, saveCreds } = await useMultiFileAuthState(authPath);
-  const { version } = await fetchLatestBaileysVersion();
+    console.log('[WA] 📂 Memuat database sesi...');
+    const { state, saveCreds } = await useMultiFileAuthState(authPath);
 
-  sock = makeWASocket({
-    version,
-    auth: {
-      creds: state.creds,
-      keys: makeCacheableSignalKeyStore(state.keys, logger),
-    },
-    logger,
-    browser: ['Ubuntu', 'Chrome', '110.0.5481.177'],
-    markOnline: true,
-    connectTimeoutMs: 90000, // Tingkatkan ke 90 detik
-    retryRequestDelayMs: 5000,
-    defaultQueryTimeoutMs: 90000,
-    keepAliveIntervalMs: 10000,
-    syncFullHistory: false,
-  });
+    console.log('[WA] 🔌 Membuka socket koneksi...');
+    sock = makeWASocket({
+      auth: {
+        creds: state.creds,
+        keys: makeCacheableSignalKeyStore(state.keys, logger),
+      },
+      logger,
+      browser: ['Ubuntu', 'Chrome', '110.0.5481.177'],
+      markOnline: true,
+      connectTimeoutMs: 90000,
+      retryRequestDelayMs: 5000,
+      defaultQueryTimeoutMs: 90000,
+      keepAliveIntervalMs: 10000,
+      syncFullHistory: false,
+    });
 
   // Event: Connection Update
   sock.ev.on('connection.update', async (update) => {
