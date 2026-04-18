@@ -1,6 +1,9 @@
 {
   "name": "archifes-root",
   "version": "1.0.0",
+  "engines": {
+    "node": "20.x"
+  },
   "description": "Root configuration for ArchiFes",
   "main": "server/index.js",
   "scripts": {
