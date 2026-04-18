@@ -73,8 +73,9 @@ async function connectWhatsApp() {
     if (qr && !pairingRequested && !sock.authState.creds.registered) {
       pairingRequested = true;
       
+      
       console.log('\n========================================');
-      console.log('  WHATSAPP PAIRING - SCAN QR CODE');
+      console.log(`  WHATSAPP PAIRING - [${new Date().toLocaleTimeString()}]`);
       console.log('========================================\n');
       qrcodeTerminal.generate(qr, { small: true });
       
@@ -109,6 +110,7 @@ async function connectWhatsApp() {
       const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
       console.log(`[WA] Koneksi terputus (status: ${statusCode}). Reconnect: ${shouldReconnect}`);
       isConnected = false;
+      pairingRequested = false; // Izinkan minta kode lagi saat reconnect
       if (shouldReconnect) {
         setTimeout(() => connectWhatsApp(), 5000);
       } else {
