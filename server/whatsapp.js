@@ -57,7 +57,7 @@ async function connectWhatsApp() {
       keys: makeCacheableSignalKeyStore(state.keys, logger),
     },
     logger,
-    browser: ['Windows', 'Chrome', '11.0.0'],
+    browser: ['ArchiFes Menfess', 'Chrome', '121.0.6167.85'],
     markOnline: true,
     connectTimeoutMs: 90000, // Tingkatkan ke 90 detik
     retryRequestDelayMs: 5000,
@@ -107,9 +107,13 @@ async function connectWhatsApp() {
     }
 
     if (connection === 'close') {
-      const statusCode = lastDisconnect?.error?.output?.statusCode;
+      const statusCode = lastDisconnect?.error?.output?.statusCode || lastDisconnect?.error?.code;
       const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-      console.log(`[WA] Koneksi terputus (status: ${statusCode}). Reconnect: ${shouldReconnect}`);
+      
+      console.log(`[WA] ⚠️ Koneksi Terputus!`);
+      console.log(`[WA] Status Code: ${statusCode}`);
+      console.log(`[WA] Reason:`, JSON.stringify(lastDisconnect?.error, null, 2));
+      
       isConnected = false;
       pairingRequested = false; // Izinkan minta kode lagi saat reconnect
       if (shouldReconnect) {
