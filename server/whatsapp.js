@@ -1,6 +1,6 @@
 import pkg from '@whiskeysockets/baileys';
-const makeWASocket = pkg.default || pkg;
 const { 
+    default: makeWASocket,
     useMultiFileAuthState, 
     DisconnectReason, 
     makeCacheableSignalKeyStore, 
