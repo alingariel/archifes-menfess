@@ -1,0 +1,20 @@
+# Dependency directories
+node_modules/
+dist/
+build/
+
+# Database and Authentication
+*.db
+*.db-journal
+wa_auth/
+whatsapp_qr.png
+
+# Environment variables
+.env
+.env.local
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,80 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+              "on-secondary": "#570017",
+              "surface-container-lowest": "#000000",
+              "surface-tint": "#ff0000",
+              "error": "#ff6e84",
+              "surface-dim": "#0e0e0e",
+              "on-primary-fixed-variant": "#610002",
+              "on-error-container": "#ffb2b9",
+              "on-background": "#ffffff",
+              "secondary-dim": "#f47785",
+              "on-surface": "#ffffff",
+              "secondary-container": "#842133",
+              "primary-dim": "#e2241f",
+              "surface-container-highest": "#262626",
+              "tertiary-container": "#d191fa",
+              "on-tertiary-fixed-variant": "#56197d",
+              "tertiary-fixed-dim": "#c889f1",
+              "on-secondary-fixed-variant": "#912b3c",
+              "on-primary-fixed": "#000000",
+              "outline": "#757575",
+              "tertiary": "#dba2ff",
+              "on-primary": "#ffffff",
+              "error-container": "#a70138",
+              "surface-bright": "#2c2c2c",
+              "on-surface-variant": "#ababab",
+              "surface-variant": "#262626",
+              "on-tertiary-fixed": "#2a0044",
+              "inverse-primary": "#c1000a",
+              "tertiary-fixed": "#d697ff",
+              "on-error": "#490013",
+              "primary-fixed": "#ff0000",
+              "surface-container-high": "#1f1f1f",
+              "primary": "#ff0000",
+              "background": "#0e0e0e",
+              "surface": "#0e0e0e",
+              "inverse-on-surface": "#555555",
+              "tertiary-dim": "#c384eb",
+              "on-primary-container": "#4f0001",
+              "primary-fixed-dim": "#650010",
+              "on-secondary-fixed": "#6a0c22",
+              "surface-container": "#191919",
+              "primary-container": "#ff0000",
+              "secondary": "#fe7e8c",
+              "on-tertiary-container": "#47026f",
+              "secondary-fixed": "#ffc2c6",
+              "outline-variant": "#484848",
+              "inverse-surface": "#f9f9f9",
+              "on-tertiary": "#53157a",
+              "secondary-fixed-dim": "#ffaeb4",
+              "surface-container-low": "#131313",
+              "on-secondary-container": "#ffc0c4",
+              "error-dim": "#d73357"
+      },
+      "borderRadius": {
+              "DEFAULT": "0.25rem",
+              "lg": "0.5rem",
+              "xl": "0.75rem",
+              "full": "9999px"
+      },
+      "fontFamily": {
+              "headline": ["Manrope"],
+              "body": ["Manrope"],
+              "label": ["Manrope"]
+      }
+    },
+  },
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/container-queries')
+  ],
+}
