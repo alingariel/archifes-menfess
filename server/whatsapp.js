@@ -24,7 +24,8 @@ let isConnected = false;
 let CHANNEL_JID = '120363428902488979@newsletter';
 let pairingRequested = false;
 
-const PHONE_NUMBER = '6281992225225';
+const PHONE_NUMBER = '6281992225225'; // Anda bisa mengabaikan ini jika menggunakan Scan QR
+const BASE_URL = process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : 'http://localhost:3001';
 
 async function connectWhatsApp() {
   const { state, saveCreds } = await useMultiFileAuthState(path.join(__dirname, 'data', 'wa_auth'));
@@ -204,7 +205,7 @@ async function sendCommentToChannel(parentUniqueId, parentContent, commentData) 
       commentData.content,
       '',
       '• - - - - - - - - - - - - - - -',
-      `💬 Balas/Lihat di: http://localhost:5173/#${parentUniqueId}`,
+      `💬 Balas/Lihat di: ${BASE_URL}/#${parentUniqueId}`,
       '',
       `— ArchiFes Menfess`
     ].join('\n');
@@ -225,7 +226,7 @@ function formatMenfessMessage(data) {
     '• - - - - - - - - - - - - - - -',
     '',
     `💌 ${data.unique_id} (${data.sender_name || 'Anonim'})`,
-    `💬 Balas/Lihat di: http://localhost:5173/#${data.unique_id}`,
+    `💬 Balas/Lihat di: ${BASE_URL}/#${data.unique_id}`,
     '',
     `— ArchiFes | Menfess Arsitektur Unnes`
   ].join('\n');
