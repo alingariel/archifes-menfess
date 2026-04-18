@@ -32,14 +32,18 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: true, // Izinkan origin yang request (lebih fleksibel dari '*')
+    origin: function (origin, callback) {
+      callback(null, true); // Izinkan semua origin secara dinamis
+    },
     methods: ["GET", "POST"],
     credentials: true
   }
 });
 
 app.use(cors({
-  origin: true,
+  origin: function (origin, callback) {
+    callback(null, true); // Izinkan semua origin secara dinamis
+  },
   credentials: true
 }));
 app.use(express.json());
