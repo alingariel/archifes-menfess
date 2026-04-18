@@ -25,12 +25,16 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*', // Untuk development, buka ke semua. Di production spesifik
+    origin: '*',
+    methods: ["GET", "POST"]
   }
 });
 
+app.use(cors());
+app.use(express.json());
+
 // Database
-const db = new sqlite3verbose.Database(path.join(__dirname, 'server', 'data', 'archifes.db'), (err) => {
+const db = new sqlite3verbose.Database(path.join(__dirname, 'data', 'archifes.db'), (err) => {
   if (err) {
     console.error('Error opening database', err);
   } else {
