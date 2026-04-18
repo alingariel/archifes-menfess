@@ -43,6 +43,11 @@ async function connectWhatsApp() {
         rmSync(authPath, { recursive: true, force: true });
         console.log('[WA] ✅ Folder wa_auth berhasil dibersihkan.');
       }
+      const qrPath = path.join(__dirname, 'data', 'whatsapp_qr.png');
+      if (existsSync(qrPath)) {
+        rmSync(qrPath, { force: true });
+        console.log('[WA] ✅ File QR lama berhasil dibersihkan.');
+      }
     } catch (err) {
       console.error('[WA] ❌ Gagal mereset sesi:', err.message);
     }
@@ -58,7 +63,7 @@ async function connectWhatsApp() {
       keys: makeCacheableSignalKeyStore(state.keys, logger),
     },
     logger,
-    browser: ['ArchiFes Menfess', 'Chrome', '121.0.6167.85'],
+    browser: ['Ubuntu', 'Chrome', '110.0.5481.177'],
     markOnline: true,
     connectTimeoutMs: 90000, // Tingkatkan ke 90 detik
     retryRequestDelayMs: 5000,
