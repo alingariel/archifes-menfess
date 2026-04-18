@@ -18,6 +18,13 @@ const __dirname = path.dirname(__filename);
 const filter = new Filter();
 filter.addWords('bodoh', 'tolol', 'goblok', 'bangsat', 'anjing', 'babi', 'kontol', 'memek', 'ngentot', 'bajingan');
 
+import { mkdirSync, existsSync } from 'fs';
+// Pastikan folder data ada
+const dataDir = path.join(__dirname, 'data');
+if (!existsSync(dataDir)) {
+  mkdirSync(dataDir, { recursive: true });
+}
+
 // WhatsApp Channel Integration
 import { connectWhatsApp, sendToChannel, sendCommentToChannel, deleteFromChannel, getStatus } from './whatsapp.js';
 
@@ -25,12 +32,16 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*',
-    methods: ["GET", "POST"]
+    origin: true, // Izinkan origin yang request (lebih fleksibel dari '*')
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 app.use(express.json());
 
 // Database
