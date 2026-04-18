@@ -96,8 +96,16 @@ async function connectWhatsApp() {
         // Peringatan pairing code
         if (process.env.WA_PHONE_NUMBER) {
           try {
+            // Beri jeda 3 detik agar sistem siap
+            await new Promise(resolve => setTimeout(resolve, 3000));
             const code = await sock.requestPairingCode(PHONE_NUMBER);
-            console.log(`\n  📱 PAIRING CODE: ${code}`);
+            console.log('\n========================================');
+            console.log('      📱 WHATSAPP PAIRING CODE');
+            console.log('========================================');
+            console.log(`\n           ${code}\n`);
+            console.log('========================================');
+            console.log('  Masukkan kode di atas pada WhatsApp HP:');
+            console.log('  Tautkan Perangkat > Tautkan dengan nomor');
             console.log('========================================\n');
           } catch (err) {
             console.log('  ⚠️  Pairing code gagal/timeout, gunakan QR code.\n');
