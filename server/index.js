@@ -112,21 +112,6 @@ const apiLimiter = rateLimit({
   message: { error: 'Terlalu banyak permintaan dari IP ini, silakan coba lagi setelah 1 menit.' }
 });
 
-// Generator soal matematika sederhana untuk Captcha
-app.get('/api/captcha', (req, res) => {
-  const num1 = Math.floor(Math.random() * 10) + 1;
-  const num2 = Math.floor(Math.random() * 10) + 1;
-  const operator = '+';
-  const result = num1 + num2;
-  
-  const token = Buffer.from(result.toString()).toString('base64');
-  
-  res.json({
-    question: `Berapa hasil dari ${num1} ${operator} ${num2}?`,
-    token: token
-  });
-});
-
 // Endpoints
 app.get('/api/menfess', (req, res) => {
   const query = `
@@ -157,17 +142,8 @@ app.get('/api/menfess', (req, res) => {
 });
 
 app.post('/api/menfess', apiLimiter, (req, res) => {
-  const { content, sender_name, theme_color, captcha_answer, captcha_token } = req.body;
+  const { content, sender_name, theme_color } = req.body;
   
-  // Validasi Captcha sederhana
-  if (!captcha_answer || !captcha_token) {
-    return res.status(400).json({ error: 'Selesaikan captcha terlebih dahulu.' });
-  }
-  const expectedResult = Buffer.from(captcha_token, 'base64').toString();
-  if (captcha_answer !== expectedResult) {
-    return res.status(400).json({ error: 'Jawaban captcha salah.' });
-  }
-
   if (!content || content.length < 5) {
     return res.status(400).json({ error: 'Konten terlalu pendek (min 5 karakter).' });
   }
