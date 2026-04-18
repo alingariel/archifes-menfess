@@ -83,10 +83,13 @@ const db = new sqlite3verbose.Database(path.join(__dirname, 'data', 'archifes.db
 
       db.run(`CREATE TABLE IF NOT EXISTS likes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        menfess_id INTEGER,
+        menfess_id INTEGER UNIQUE,
         count INTEGER DEFAULT 0,
         FOREIGN KEY(menfess_id) REFERENCES menfess(id)
       )`);
+
+      // Pastikan index unik ada untuk database lama
+      db.run("CREATE UNIQUE INDEX IF NOT EXISTS idx_likes_menfess ON likes(menfess_id)");
 
       db.run(`CREATE TABLE IF NOT EXISTS contact_messages (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
