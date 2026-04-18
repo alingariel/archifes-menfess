@@ -1,10 +1,5 @@
 import pkg from '@whiskeysockets/baileys';
-const makeWASocket = pkg.default || pkg;
-const useMultiFileAuthState = pkg.useMultiFileAuthState || pkg.default?.useMultiFileAuthState;
-const DisconnectReason = pkg.DisconnectReason || pkg.default?.DisconnectReason;
-const makeCacheableSignalKeyStore = pkg.makeCacheableSignalKeyStore || pkg.default?.makeCacheableSignalKeyStore;
-const fetchLatestBaileysVersion = pkg.fetchLatestBaileysVersion || pkg.default?.fetchLatestBaileysVersion;
-
+// Kita akan melakukan import dinamis di dalam fungsi untuk kompatibilitas maksimal
 import qrcodeTerminal from 'qrcode-terminal';
 import QRCode from 'qrcode';
 import path from 'path';
@@ -26,6 +21,15 @@ const PHONE_NUMBER = process.env.WA_PHONE_NUMBER || '628123456789'; // Masukkan 
 const BASE_URL = process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : 'http://localhost:3001';
 
 async function connectWhatsApp() {
+  // Import dinamis untuk mengatasi masalah kompatibilitas ESM
+  const { 
+    default: makeWASocket,
+    useMultiFileAuthState, 
+    DisconnectReason, 
+    makeCacheableSignalKeyStore, 
+    fetchLatestBaileysVersion 
+  } = await import('@whiskeysockets/baileys');
+
   const { state, saveCreds } = await useMultiFileAuthState(path.join(__dirname, 'data', 'wa_auth'));
   const { version } = await fetchLatestBaileysVersion();
 
