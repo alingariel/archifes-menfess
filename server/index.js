@@ -318,7 +318,7 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3001;
 // Rute terakhir: Fallback untuk website (SPA)
-app.get('*', (req, res) => {
+app.get('*splat', (req, res) => {
   // Jika mencari /api atau /socket.io, biarkan lewat. 
   // Tapi sisanya tampilkan website (index.html)
   if (!req.path.startsWith('/api') && !req.path.startsWith('/socket.io')) {
