@@ -21,9 +21,12 @@ const filter = new Filter();
 filter.addWords('bodoh', 'tolol', 'goblok', 'bangsat', 'anjing', 'babi', 'kontol', 'memek', 'ngentot', 'bajingan');
 
 // Pastikan folder data ada
-const dataDir = path.join(__dirname, 'data');
+const dataDir = path.resolve(__dirname, 'data');
 if (!existsSync(dataDir)) {
   mkdirSync(dataDir, { recursive: true });
+  console.log('[System] 📁 Folder data baru dibuat di:', dataDir);
+} else {
+  console.log('[System] 📁 Folder data terdeteksi di:', dataDir);
 }
 
 // WhatsApp Channel Integration
@@ -118,11 +121,19 @@ const apiLimiter = rateLimit({
 
 // Endpoints
 app.get('/api/wa/qr', (req, res) => {
-  const qrPath = path.join(__dirname, 'data', 'whatsapp_qr.png');
+  const qrPath = path.resolve(__dirname, 'data', 'whatsapp_qr.png');
   if (fs.existsSync(qrPath)) {
     res.sendFile(qrPath);
   } else {
-    res.status(404).send('QR Code tidak ditemukan atau bot sudah terhubung. Pastikan RESET_WA_SESSION=true jika ingin memicu QR baru.');
+    res.setHeader('Content-Type', 'text/html');
+    res.status(200).send(`
+      <div style="font-family: sans-serif; text-align: center; padding: 50px;">
+        <h2>🔄 Bot Sedang Menyiapkan QR Code...</h2>
+        <p>Mohon tunggu sekitar 30 detik, lalu <b>refresh halaman ini</b>.</p>
+        <p style="color: #666; font-size: 0.9em;">(Jika tetap tidak muncul, pastikan Anda sudah menyetel RESET_WA_SESSION=true di Railway)</p>
+        <script>setTimeout(() => { window.location.reload(); }, 10000);</script>
+      </div>
+    `);
   }
 });
 
