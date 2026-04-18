@@ -10,6 +10,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+import { mkdirSync, existsSync, rmSync } from 'fs';
+
 const logger = pino({ level: 'silent' });
 
 let sock = null;
@@ -30,7 +32,22 @@ async function connectWhatsApp() {
     fetchLatestBaileysVersion 
   } = await import('@whiskeysockets/baileys');
 
-  const { state, saveCreds } = await useMultiFileAuthState(path.join(__dirname, 'data', 'wa_auth'));
+  const authPath = path.join(__dirname, 'data', 'wa_auth');
+  
+  // Fitur Reset: Hapus folder sesi jika diminta lewat Environment Variables
+  if (process.env.RESET_WA_SESSION === 'true') {
+    console.log('[WA] 🛠️  Mereset sesi WhatsApp atas permintaan user...');
+    try {
+      if (existsSync(authPath)) {
+        rmSync(authPath, { recursive: true, force: true });
+        console.log('[WA] ✅ Folder wa_auth berhasil dibersihkan.');
+      }
+    } catch (err) {
+      console.error('[WA] ❌ Gagal mereset sesi:', err.message);
+    }
+  }
+
+  const { state, saveCreds } = await useMultiFileAuthState(authPath);
   const { version } = await fetchLatestBaileysVersion();
 
   sock = makeWASocket({
