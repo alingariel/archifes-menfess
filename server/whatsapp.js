@@ -44,16 +44,27 @@ async function connectWhatsApp() {
 
     const { state, saveCreds } = await useMultiFileAuthState(authPath);
 
+    let version = [2, 3000, 1015901307]; // Fallback versi stabil
+    try {
+      const { version: latestVersion } = await fetchLatestBaileysVersion();
+      version = latestVersion;
+      console.log(`[WA] 🆕 Menggunakan protokol WhatsApp v${version.join('.')}`);
+    } catch (e) {
+      console.log('[WA] ⚠️ Gagal mengambil versi terbaru, menggunakan fallback stabil.');
+    }
+
+    console.log('[WA] 🔌 Membuka socket koneksi...');
     sock = makeWASocket({
+      version,
       auth: {
         creds: state.creds,
         keys: makeCacheableSignalKeyStore(state.keys, logger),
       },
       logger,
-      browser: ['Mac OS', 'Chrome', '121.0.0.0'],
-      version: [2, 3000, 1015901307],
+      browser: ['Windows', 'Edge', '122.0.2365.92'],
       markOnline: true,
       connectTimeoutMs: 120000,
+      defaultQueryTimeoutMs: 120000,
       syncFullHistory: false
     });
 
