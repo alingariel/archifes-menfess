@@ -120,23 +120,6 @@ const apiLimiter = rateLimit({
 });
 
 // Endpoints
-app.get('/api/wa/qr', (req, res) => {
-  const qrPath = path.resolve(__dirname, 'data', 'whatsapp_qr.png');
-  if (fs.existsSync(qrPath)) {
-    res.sendFile(qrPath);
-  } else {
-    res.setHeader('Content-Type', 'text/html');
-    res.status(200).send(`
-      <div style="font-family: sans-serif; text-align: center; padding: 50px;">
-        <h2>🔄 Bot Sedang Menyiapkan QR Code...</h2>
-        <p>Mohon tunggu sekitar 30 detik, lalu <b>refresh halaman ini</b>.</p>
-        <p style="color: #666; font-size: 0.9em;">(Jika tetap tidak muncul, pastikan Anda sudah menyetel RESET_WA_SESSION=true di Railway)</p>
-        <script>setTimeout(() => { window.location.reload(); }, 10000);</script>
-      </div>
-    `);
-  }
-});
-
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 app.get('/api/menfess', (req, res) => {
@@ -343,7 +326,4 @@ app.get('*splat', (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`Server berjalan di port ${PORT}`);
-  
-  // Hubungkan ulang bot WhatsApp Otomatis
-  connectWhatsApp().catch(err => console.error('[WA] Gagal memulai:', err.message));
 });
