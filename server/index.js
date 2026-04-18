@@ -1,17 +1,25 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const sqlite3 = require('sqlite3').verbose();
-const cors = require('cors');
-const rateLimit = require('express-rate-limit');
-const Filter = require('bad-words');
+import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
+import sqlite3 from 'sqlite3';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
+import Filter from 'bad-words';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const sqlite3verbose = sqlite3.verbose();
+
+// Simulasi __dirname di ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Khusus custom bad-words in indonesian jika diperlukan
 const filter = new Filter();
 filter.addWords('bodoh', 'tolol', 'goblok', 'bangsat', 'anjing', 'babi', 'kontol', 'memek', 'ngentot', 'bajingan');
 
 // WhatsApp Channel Integration
-const { connectWhatsApp, sendToChannel, sendCommentToChannel, deleteFromChannel, getStatus } = require('./whatsapp');
+import { connectWhatsApp, sendToChannel, sendCommentToChannel, deleteFromChannel, getStatus } from './whatsapp.js';
 
 const app = express();
 const server = http.createServer(app);
@@ -22,7 +30,7 @@ const io = new Server(server, {
 });
 
 // Database
-const db = new sqlite3.Database('./archifes.db', (err) => {
+const db = new sqlite3verbose.Database(path.join(__dirname, 'archifes.db'), (err) => {
   if (err) {
     console.error('Error opening database', err);
   } else {
@@ -87,9 +95,6 @@ app.get('/api/captcha', (req, res) => {
   const operator = '+';
   const result = num1 + num2;
   
-  // Dalam best practice, hasil ini harus disimpan di sesi server lalu divalidasi.
-  // Untuk kesederhanaan stateless API di level ini, kita bisa mengirim jawaban di-hash atau menyimpannya di memory (token).
-  // Di sini kita gunakan JWT ringan atau menyandikan nilai as expectedValue
   const token = Buffer.from(result.toString()).toString('base64');
   
   res.json({
@@ -98,45 +103,73 @@ app.get('/api/captcha', (req, res) => {
   });
 });
 
-app.post('/api/menfess', apiLimiter, (req, res) => {
-  const { content, sender_name, theme_color, session_id } = req.body;
+// Endpoints
+app.get('/api/menfess', (req, res) => {
+  const query = `
+    SELECT m.*, l.count as likes
+    FROM menfess m
+    LEFT JOIN likes l ON m.id = l.menfess_id
+    ORDER BY m.created_at DESC
+    LIMIT 50
+  `;
   
-  // Validasi Konten
-  if (!content || content.length > 280) {
-    return res.status(400).json({ error: 'Konten tidak valid atau melebihi 280 karakter.' });
+  db.all(query, [], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: 'Gagal mengambil data menfess.' });
+    }
+
+    // Ambil komentar untuk setiap menfess
+    const menfessIds = rows.map(r => r.id);
+    if (menfessIds.length === 0) return res.json([]);
+
+    db.all(`SELECT * FROM comments WHERE menfess_id IN (${menfessIds.join(',')})`, [], (err2, comments) => {
+      const result = rows.map(row => ({
+        ...row,
+        comments: (comments || []).filter(c => c.menfess_id === row.id)
+      }));
+      res.json(result);
+    });
+  });
+});
+
+app.post('/api/menfess', apiLimiter, (req, res) => {
+  const { content, sender_name, theme_color, captcha_answer, captcha_token } = req.body;
+  
+  // Validasi Captcha sederhana
+  if (!captcha_answer || !captcha_token) {
+    return res.status(400).json({ error: 'Selesaikan captcha terlebih dahulu.' });
+  }
+  const expectedResult = Buffer.from(captcha_token, 'base64').toString();
+  if (captcha_answer !== expectedResult) {
+    return res.status(400).json({ error: 'Jawaban captcha salah.' });
   }
 
-  // Filter bad words
+  if (!content || content.length < 5) {
+    return res.status(400).json({ error: 'Konten terlalu pendek (min 5 karakter).' });
+  }
+
   const cleanContent = filter.clean(content);
-  const cleanSender = sender_name ? filter.clean(sender_name) : 'Anonim';
-  const finalTheme = theme_color || '#1a1a1a'; // Default theme
-  
-  // Generate Unique ID
   const uniqueId = '#ARC-' + Math.floor(1000 + Math.random() * 9000);
-  const ipAddress = req.ip || req.connection.remoteAddress;
+  const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const sessionId = req.headers['x-session-id'] || 'anon';
 
   const stmt = db.prepare('INSERT INTO menfess (unique_id, content, sender_name, theme_color, ip_address, session_id) VALUES (?, ?, ?, ?, ?, ?)');
-  stmt.run([uniqueId, cleanContent, cleanSender, finalTheme, ipAddress, session_id], function(err) {
+  stmt.run([uniqueId, cleanContent, sender_name || 'Anonim', theme_color || '#1a1a1a', ip, sessionId], function(err) {
     if (err) {
-      console.error(err);
-      return res.status(500).json({ error: 'Gagal menyimpan menfess.' });
+      return res.status(500).json({ error: 'Gagal mengirim menfess.' });
     }
     
-    // Inisialisasi data di tabel Likes
-    db.run('INSERT INTO likes (menfess_id) VALUES (?)', [this.lastID]);
-
     const baru = {
       id: this.lastID,
       unique_id: uniqueId,
       content: cleanContent,
-      sender_name: cleanSender,
-      theme_color: finalTheme,
-      created_at: new Date().toISOString(),
+      sender_name: sender_name || 'Anonim',
+      theme_color: theme_color || '#1a1a1a',
       likes: 0,
-      comments: []
+      comments: [],
+      created_at: new Date().toISOString()
     };
 
-    // Broadcast pesan baru
     io.emit('new_menfess', baru);
 
     // Kirim ke Saluran WhatsApp & Simpan ID pesannya
@@ -151,99 +184,47 @@ app.post('/api/menfess', apiLimiter, (req, res) => {
   });
 });
 
-app.get('/api/menfess', (req, res) => {
-  const query = `
-    SELECT m.*, l.count as likes
-    FROM menfess m
-    LEFT JOIN likes l ON m.id = l.menfess_id
-    ORDER BY m.created_at DESC
-    LIMIT 50
-  `;
-  
-  db.all(query, [], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: 'Gagal mengambil menfess.' });
-    }
-    
-    // Ambil semua comments untuk menfess tersebut
-    const menfessIds = rows.map(r => r.id);
-    if (menfessIds.length === 0) {
-      return res.json([]);
-    }
-
-    const placeholders = menfessIds.map(() => '?').join(',');
-    db.all(`SELECT * FROM comments WHERE menfess_id IN (${placeholders}) ORDER BY created_at ASC`, menfessIds, (err2, commentsRows) => {
-      if (err2) {
-        return res.status(500).json({ error: 'Gagal mengambil komentar.' });
-      }
-
-      // Gabungkan comments ke masing2 menfess
-      const populated = rows.map(menfess => {
-        menfess.comments = commentsRows.filter(c => c.menfess_id === menfess.id);
-        return menfess;
-      });
-
-      res.json(populated);
-    });
-  });
-});
-
 app.post('/api/menfess/:id/like', (req, res) => {
   const menfessId = req.params.id;
-  db.run('UPDATE likes SET count = count + 1 WHERE menfess_id = ?', [menfessId], function(err) {
-    if (err) {
-      return res.status(500).json({ error: 'Gagal like menfess.' });
-    }
+  
+  db.run(`INSERT INTO likes (menfess_id, count) VALUES (?, 1) ON CONFLICT(menfess_id) DO UPDATE SET count = count + 1`, [menfessId], function(err) {
+    if (err) return res.status(500).json({ error: 'Gagal menyukai.' });
     
     db.get('SELECT count FROM likes WHERE menfess_id = ?', [menfessId], (err2, row) => {
-      if (row) {
-        io.emit('update_like', { menfess_id: menfessId, count: row.count });
-        res.json({ count: row.count });
-      }
-    });
-  });
-});
-
-app.post('/api/menfess/:id/unlike', (req, res) => {
-  const menfessId = req.params.id;
-  db.run('UPDATE likes SET count = count - 1 WHERE menfess_id = ? AND count > 0', [menfessId], function(err) {
-    if (err) {
-      return res.status(500).json({ error: 'Gagal unlike menfess.' });
-    }
-    
-    db.get('SELECT count FROM likes WHERE menfess_id = ?', [menfessId], (err2, row) => {
-      if (row) {
-        io.emit('update_like', { menfess_id: menfessId, count: row.count });
-        res.json({ count: row.count });
-      } else {
-        res.status(404).json({ error: 'Not found' });
-      }
+      io.emit('update_like', { menfess_id: menfessId, count: row.count });
+      res.json({ success: true, count: row.count });
     });
   });
 });
 
 app.post('/api/menfess/:id/comments', (req, res) => {
   const menfessId = req.params.id;
-  const { content, session_id } = req.body;
-  if (!content) return res.status(400).json({ error: 'Komentar tidak boleh kosong' });
+  const { content } = req.body;
+  const sessionId = req.headers['x-session-id'] || 'anon';
+
+  if (!content) return res.status(400).json({ error: 'Komentar kosong.' });
 
   const cleanContent = filter.clean(content);
+  db.run('INSERT INTO comments (menfess_id, content, session_id) VALUES (?, ?, ?)', [menfessId, cleanContent, sessionId], function(err) {
+    if (err) return res.status(500).json({ error: 'Gagal mengirim komentar.' });
+    
+    const newComment = {
+      id: this.lastID,
+      menfess_id: menfessId,
+      content: cleanContent,
+      created_at: new Date().toISOString()
+    };
+    
+    io.emit('new_comment', newComment);
 
-  db.run('INSERT INTO comments (menfess_id, content, session_id) VALUES (?, ?, ?)', [menfessId, cleanContent, session_id], function(err) {
-    if (err) {
-      return res.status(500).json({ error: 'Gagal membalas.' });
-    }
-    const comment = { id: this.lastID, menfess_id: parseInt(menfessId), content: cleanContent, session_id: session_id, created_at: new Date().toISOString() };
-    io.emit('new_comment', comment);
-
-    // Kirim notifikasi balasan ke WhatsApp
+    // Integrasi ke WhatsApp Saluran
     db.get('SELECT unique_id, content FROM menfess WHERE id = ?', [menfessId], (err, row) => {
       if (row) {
-        sendCommentToChannel(row.unique_id, row.content, comment).catch(err => console.error('[WA] Error Comments:', err.message));
+        sendCommentToChannel(row.unique_id, row.content, newComment);
       }
     });
 
-    res.status(201).json(comment);
+    res.status(201).json(newComment);
   });
 });
 
@@ -280,21 +261,14 @@ app.delete('/api/menfess/:id', (req, res) => {
   });
 });
 
-// ========== CONTACT ADMIN ==========
+// Kontak
 app.post('/api/contact', (req, res) => {
   const { email, message } = req.body;
-  if (!message || message.trim().length === 0) {
-    return res.status(400).json({ error: 'Pesan tidak boleh kosong.' });
-  }
-  const cleanEmail = email ? email.trim() : 'anonim@archifes.id';
-  const cleanMessage = filter.clean(message.trim());
+  if (!email || !message) return res.status(400).json({ error: 'Data tidak lengkap.' });
 
-  db.run('INSERT INTO contact_messages (email, message) VALUES (?, ?)', [cleanEmail, cleanMessage], function(err) {
-    if (err) {
-      console.error('Gagal menyimpan pesan kontak:', err);
-      return res.status(500).json({ error: 'Gagal mengirim pesan.' });
-    }
-    res.status(201).json({ success: true, message: 'Pesan berhasil dikirim ke admin.' });
+  db.run('INSERT INTO contact_messages (email, message) VALUES (?, ?)', [email, message], function(err) {
+    if (err) return res.status(500).json({ error: 'Gagal kirim pesan.' });
+    res.json({ success: true });
   });
 });
 

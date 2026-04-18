@@ -1,8 +1,21 @@
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, makeCacheableSignalKeyStore, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
-const qrcodeTerminal = require('qrcode-terminal');
-const QRCode = require('qrcode');
-const path = require('path');
-const pino = require('pino');
+import pkg from '@whiskeysockets/baileys';
+const { 
+  default: makeWASocket, 
+  useMultiFileAuthState, 
+  DisconnectReason, 
+  makeCacheableSignalKeyStore, 
+  fetchLatestBaileysVersion 
+} = pkg;
+
+import qrcodeTerminal from 'qrcode-terminal';
+import QRCode from 'qrcode';
+import path from 'path';
+import pino from 'pino';
+import { fileURLToPath } from 'url';
+
+// Simulasi __dirname di ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const logger = pino({ level: 'silent' });
 
@@ -221,4 +234,4 @@ function formatMenfessMessage(data) {
 function setChannelJid(jid) { CHANNEL_JID = jid; }
 function getStatus() { return { connected: isConnected, channelJid: CHANNEL_JID }; }
 
-module.exports = { connectWhatsApp, sendToChannel, sendCommentToChannel, deleteFromChannel, setChannelJid, getStatus };
+export { connectWhatsApp, sendToChannel, sendCommentToChannel, deleteFromChannel, setChannelJid, getStatus };
