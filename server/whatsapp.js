@@ -1,11 +1,9 @@
 import pkg from '@whiskeysockets/baileys';
-const { 
-    default: makeWASocket,
-    useMultiFileAuthState, 
-    DisconnectReason, 
-    makeCacheableSignalKeyStore, 
-    fetchLatestBaileysVersion 
-} = pkg;
+const makeWASocket = pkg.default || pkg;
+const useMultiFileAuthState = pkg.useMultiFileAuthState || pkg.default?.useMultiFileAuthState;
+const DisconnectReason = pkg.DisconnectReason || pkg.default?.DisconnectReason;
+const makeCacheableSignalKeyStore = pkg.makeCacheableSignalKeyStore || pkg.default?.makeCacheableSignalKeyStore;
+const fetchLatestBaileysVersion = pkg.fetchLatestBaileysVersion || pkg.default?.fetchLatestBaileysVersion;
 
 import qrcodeTerminal from 'qrcode-terminal';
 import QRCode from 'qrcode';
