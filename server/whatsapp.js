@@ -117,10 +117,9 @@ async function connectWhatsApp() {
   sock.ev.on('chats.upsert', (chats) => {
     chats.forEach(chat => {
       if (chat.id.endsWith('@newsletter')) {
-        console.log(`[WA] 📢 Saluran ditemukan via Chat: ${chat.name || 'Tanpa Nama'} (${chat.id})`);
         if (!CHANNEL_JID) {
           CHANNEL_JID = chat.id;
-          console.log(`[WA] 🎯 Saluran aktif diset otomatis ke: ${chat.id}`);
+          console.log(`[WA] 🎯 Saluran aktif diset otomatis.`);
         }
       }
     });
@@ -131,10 +130,9 @@ async function connectWhatsApp() {
     const msg = m.messages[0];
     const jid = msg.key.remoteJid;
     if (jid && jid.endsWith('@newsletter')) {
-      console.log(`[WA] 📢 Saluran ditemukan via Pesan: (${jid})`);
       if (!CHANNEL_JID) {
         CHANNEL_JID = jid;
-        console.log(`[WA] 🎯 Saluran aktif diset otomatis ke: ${jid}`);
+        console.log(`[WA] 🎯 Saluran aktif ditemukan via pesan.`);
       }
     }
   });

@@ -103,13 +103,13 @@ const db = new sqlite3verbose.Database(path.join(__dirname, 'data', 'archifes.db
 app.use(cors());
 app.use(express.json());
 
-// Trust proxy for rate limiting (if behind a proxy like Nginx, but good practice here)
+// Trust proxy for rate limiting (Railway uses proxy)
 app.set('trust proxy', 1);
 
 const apiLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 menit
-  max: 30, // batas cukup longgar (30 kali) per IP untuk masa testing
-  message: { error: 'Terlalu banyak permintaan dari IP ini, silakan coba lagi setelah 1 menit.' }
+  windowMs: 10 * 60 * 1000, // 10 menit
+  max: 5, // batas 5 kali posting per IP dalam waktu 10 menit
+  message: { error: 'Keamanan: Terlalu banyak pesan. Silakan coba lagi dalam 10 menit untuk mencegah spam.' }
 });
 
 // Endpoints
@@ -231,8 +231,9 @@ app.post('/api/menfess/:id/comments', (req, res) => {
 app.delete('/api/menfess/:id', (req, res) => {
   const menfessId = req.params.id;
   const authMsg = req.headers['authorization'];
+  const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'super-secret-default-change-me';
   
-  if (authMsg !== 'admin123') {
+  if (authMsg !== ADMIN_PASS) {
     return res.status(401).json({ error: 'Otorisasi ditolak!' });
   }
 
@@ -274,7 +275,9 @@ app.post('/api/contact', (req, res) => {
 
 app.get('/api/contact', (req, res) => {
   const authMsg = req.headers['authorization'];
-  if (authMsg !== 'admin123') {
+  const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'super-secret-default-change-me';
+  
+  if (authMsg !== ADMIN_PASS) {
     return res.status(401).json({ error: 'Otorisasi ditolak!' });
   }
   db.all('SELECT * FROM contact_messages ORDER BY created_at DESC', [], (err, rows) => {
