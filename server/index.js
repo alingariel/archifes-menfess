@@ -107,9 +107,9 @@ app.use(express.json());
 app.set('trust proxy', 1);
 
 const apiLimiter = rateLimit({
-  windowMs: 5 * 60 * 1000, // 5 menit
-  max: 3, // batas 3 kali posting per IP dalam waktu 5 menit
-  message: { error: 'Terlalu banyak permintaan dari IP ini, silakan coba lagi setelah 5 menit.' }
+  windowMs: 1 * 60 * 1000, // 1 menit
+  max: 30, // batas cukup longgar (30 kali) per IP untuk masa testing
+  message: { error: 'Terlalu banyak permintaan dari IP ini, silakan coba lagi setelah 1 menit.' }
 });
 
 // Generator soal matematika sederhana untuk Captcha
