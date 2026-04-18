@@ -439,13 +439,9 @@ export default function App() {
           
           <form className="w-full text-left" onSubmit={(e) => {
               e.preventDefault();
-              if(adminPassword === 'admin123') {
-                setIsAdminMode(true);
-                setCurrentView('admin_dashboard');
-                displayToast('Akses Diberikan. System Override.');
-              } else {
-                displayToast('Sandi salah!');
-              }
+              setIsAdminMode(true);
+              setCurrentView('admin_dashboard');
+              displayToast('Mengakses Terminal...');
             }}>
             
             <label className="block text-[10px] font-bold tracking-[0.2em] text-[#ff0000] mb-3 uppercase">Protokol Akses</label>
