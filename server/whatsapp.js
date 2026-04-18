@@ -23,16 +23,17 @@ const PHONE_NUMBER = process.env.WA_PHONE_NUMBER || '628123456789'; // Masukkan 
 const BASE_URL = process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : 'http://localhost:3001';
 
 async function connectWhatsApp() {
-  // Import dinamis untuk mengatasi masalah kompatibilitas ESM
-  const { 
-    default: makeWASocket,
-    useMultiFileAuthState, 
-    DisconnectReason, 
-    makeCacheableSignalKeyStore, 
-    fetchLatestBaileysVersion 
-  } = await import('@whiskeysockets/baileys');
+  console.log('[WA] 🚀 Inisialisasi bot dimulai...');
+  try {
+    const { 
+      default: makeWASocket, 
+      DisconnectReason, 
+      useMultiFileAuthState, 
+      makeCacheableSignalKeyStore,
+      fetchLatestBaileysVersion 
+    } = await import('@whiskeysockets/baileys');
 
-  const authPath = path.join(__dirname, 'data', 'wa_auth');
+    const authPath = path.join(__dirname, 'data', 'wa_auth');
   
   // Fitur Reset: Hapus folder sesi jika diminta lewat Environment Variables
   if (process.env.RESET_WA_SESSION === 'true') {
@@ -134,6 +135,9 @@ async function connectWhatsApp() {
       setTimeout(() => findChannel(), 5000);
     }
   });
+  } catch (initErr) {
+    console.error('[WA] 🚨 Gagal Inisialisasi Fatal:', initErr);
+  }
 
   sock.ev.on('creds.update', saveCreds);
 
