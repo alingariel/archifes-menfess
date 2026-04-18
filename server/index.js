@@ -7,6 +7,8 @@ import rateLimit from 'express-rate-limit';
 import Filter from 'bad-words';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { mkdirSync, existsSync } from 'fs';
+import * as fs from 'fs';
 
 const sqlite3verbose = sqlite3.verbose();
 
@@ -18,7 +20,6 @@ const __dirname = path.dirname(__filename);
 const filter = new Filter();
 filter.addWords('bodoh', 'tolol', 'goblok', 'bangsat', 'anjing', 'babi', 'kontol', 'memek', 'ngentot', 'bajingan');
 
-import { mkdirSync, existsSync } from 'fs';
 // Pastikan folder data ada
 const dataDir = path.join(__dirname, 'data');
 if (!existsSync(dataDir)) {
@@ -116,6 +117,15 @@ const apiLimiter = rateLimit({
 });
 
 // Endpoints
+app.get('/api/wa/qr', (req, res) => {
+  const qrPath = path.join(__dirname, 'data', 'whatsapp_qr.png');
+  if (fs.existsSync(qrPath)) {
+    res.sendFile(qrPath);
+  } else {
+    res.status(404).send('QR Code tidak ditemukan atau bot sudah terhubung. Pastikan RESET_WA_SESSION=true jika ingin memicu QR baru.');
+  }
+});
+
 app.get('/api/menfess', (req, res) => {
   const query = `
     SELECT m.*, l.count as likes
