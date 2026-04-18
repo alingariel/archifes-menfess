@@ -27,7 +27,7 @@ let pairingRequested = false;
 const PHONE_NUMBER = '6281992225225';
 
 async function connectWhatsApp() {
-  const { state, saveCreds } = await useMultiFileAuthState(path.join(__dirname, 'wa_auth'));
+  const { state, saveCreds } = await useMultiFileAuthState(path.join(__dirname, 'data', 'wa_auth'));
   const { version } = await fetchLatestBaileysVersion();
 
   sock = makeWASocket({
@@ -59,9 +59,9 @@ async function connectWhatsApp() {
       qrcodeTerminal.generate(qr, { small: true });
       
       // Save QR to file for easier scanning
-      QRCode.toFile(path.join(__dirname, 'whatsapp_qr.png'), qr, (err) => {
+      QRCode.toFile(path.join(__dirname, 'data', 'whatsapp_qr.png'), qr, (err) => {
         if (err) console.error('[WA] Gagal simpan file QR:', err);
-        else console.log('[WA] 🖼️  QR Code disimpan ke: whatsapp_qr.png (Silakan buka file ini untuk scan)');
+        else console.log('[WA] 🖼️  QR Code disimpan ke: data/whatsapp_qr.png (Silakan buka file ini untuk scan)');
       });
       console.log('\n  Scan QR di atas dari WhatsApp > Perangkat Tertaut > Tautkan Perangkat');
       console.log('  ATAU gunakan pairing code di bawah:\n');
@@ -79,7 +79,7 @@ async function connectWhatsApp() {
       console.log('\n[WA] 🔄 QR Code diperbarui, scan ulang:');
       qrcodeTerminal.generate(qr, { small: true });
       
-      QRCode.toFile(path.join(__dirname, 'whatsapp_qr.png'), qr, (err) => {
+      QRCode.toFile(path.join(__dirname, 'data', 'whatsapp_qr.png'), qr, (err) => {
         if (err) console.error('[WA] Gagal update file QR:', err);
       });
     }

@@ -30,7 +30,7 @@ const io = new Server(server, {
 });
 
 // Database
-const db = new sqlite3verbose.Database(path.join(__dirname, 'archifes.db'), (err) => {
+const db = new sqlite3verbose.Database(path.join(__dirname, 'server', 'data', 'archifes.db'), (err) => {
   if (err) {
     console.error('Error opening database', err);
   } else {
